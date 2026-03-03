@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export $(grep -v '^#' .env | xargs)
+docker exec --user www-data ${BASENAME} truncate -s 0 /var/www/html/data/nextcloud.log

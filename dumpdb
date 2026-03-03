@@ -1,0 +1,28 @@
+#!/bin/bash
+# Dump the PostgreSQL database in preparation of an upgrade.
+
+# Load variables from your .env file
+# Ensure .env contains POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB
+export $(grep -v '^#' .env | xargs)
+
+BACKUP_DEST="./backups"
+DATE=$(date +%Y-%m-%d_%H%M)
+FILE_NAME="nextcloud_pg_db_$DATE.sql.gz"
+
+mkdir -p "$BACKUP_DEST"
+
+echo "Starting PostgreSQL database dump..."
+
+# Dump, compress, and save
+# We pass PGPASSWORD into the container env so pg_dump doesn't prompt for it
+docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" ${BASENAME}-db \
+  pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" | gzip > "$BACKUP_DEST/$FILE_NAME"
+
+if [ $? -eq 0 ]; then
+    echo "Success! Backup saved to $BACKUP_DEST/$FILE_NAME"
+    # Optional: Delete backups older than 30 days
+    find "$BACKUP_DEST" -type f -mtime +30 -name "*.sql.gz" -delete
+else
+    echo "Error: Database dump failed!"
+    exit 1
+fi

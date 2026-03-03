@@ -1,0 +1,99 @@
+name: ${BASENAME}
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ${BASENAME}-db
+    restart: unless-stopped
+    volumes:
+      - ./nextcloud_db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+    networks:
+      - proxy-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nextcloud:
+    image: nextcloud:latest
+    restart: unless-stopped
+    container_name: ${BASENAME}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ${NEXTCLOUD_DATA}:/var/www/html
+    environment:
+      - POSTGRES_HOST=${BASENAME}-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=${BASENAME}-redis
+      - PHP_MEMORY_LIMIT=2G # The Office app needs this much, optimally
+      - PHP_UPLOAD_LIMIT=10G # Adjust as needed, as this may be excessive
+    networks:
+      - proxy-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${BASENAME}.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.${BASENAME}.entrypoints=websecure"
+      - "traefik.http.routers.${BASENAME}.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.${BASENAME}.loadbalancer.server.port=80"
+      - "traefik.http.routers.${BASENAME}.middlewares=${BASENAME}-regex"
+      - "traefik.http.middlewares.${BASENAME}-redirect.redirectregex.permanent=true"
+      - "traefik.http.middlewares.${BASENAME}-redirect.redirectregex.regex=https://(.*)/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.${BASENAME}-redirect.redirectregex.replacement=https://$${1}/remote.php/dav/"
+      - "traefik.http.middlewares.${BASENAME}-hsts.headers.stsSeconds=15552000"
+      - "traefik.http.middlewares.${BASENAME}-hsts.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.${BASENAME}-hsts.headers.stsPreload=true"
+      - "traefik.http.routers.${BASENAME}.middlewares=${BASENAME}-redirect,${BASENAME}-hsts"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:alpine
+    container_name: ${BASENAME}-redis
+    restart: unless-stopped
+    networks:
+      - proxy-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cron:
+    image: nextcloud:latest
+    container_name: ${BASENAME}-cron
+    restart: unless-stopped
+    volumes:
+      - ${NEXTCLOUD_DATA}:/var/www/html
+    entrypoint: /cron.sh
+    depends_on:
+      - db
+      - redis
+    environment:
+      - POSTGRES_HOST=${BASENAME}-db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_HOST=${BASENAME}-redis
+    networks:
+      - proxy-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy-net:
+    external: true

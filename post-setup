@@ -1,0 +1,41 @@
+#!/bin/bash
+# Run after running "docker compose up" and setting up your admin account.
+
+export $(grep -v '^#' .env | xargs)
+set -e
+
+echo "Enabling NextCloud log rotation."
+# Set log level to 'Warning' (2) to stop logging every single 'Info' event
+docker exec --user www-data ${BASENAME} php occ log:manage --level 2
+# Set a max log file size for Nextcloud's internal log (in bytes)
+docker exec --user www-data ${BASENAME} php occ config:system:set log_rotate_size --value 50000000
+
+echo "Enabling Redis."
+docker exec --user www-data ${BASENAME} php occ config:system:set memcache.local --value "\OC\Memcache\APCu"
+docker exec --user www-data ${BASENAME} php occ config:system:set memcache.distributed --value "\OC\Memcache\Redis"
+docker exec --user www-data ${BASENAME} php occ config:system:set memcache.locking --value "\OC\Memcache\Redis"
+docker exec --user www-data ${BASENAME} php occ config:system:set redis host --value "${BASENAME}-redis"
+docker exec --user www-data ${BASENAME} php occ config:system:set redis port --value 6379
+
+echo "Enabling cron."
+docker exec --user www-data ${BASENAME} php occ background:cron
+
+echo "Configuring proxy."
+# Set the external URL
+docker exec --user www-data ${BASENAME} php occ config:system:set overwrite.cli.url --value="https://${DOMAIN}"
+# Force HTTPS protocol for all generated links
+docker exec --user www-data ${BASENAME} php occ config:system:set overwriteprotocol --value="https"
+# Trust the Traefik proxy
+docker exec --user www-data ${BASENAME} php occ config:system:set trusted_proxies 0 --value="172.16.0.0/12"
+
+echo "Adding missing indices."
+docker exec --user www-data ${BASENAME} php occ db:add-missing-indices
+
+echo "Mimetype migrations update."
+docker exec --user www-data ${BASENAME} php occ maintenance:repair --include-expensive
+
+echo "Set maintenance window."
+docker exec --user www-data ${BASENAME} php occ config:system:set maintenance_window_start --type=integer --value=1
+
+echo "Fix Office allowed IPs.
+docker exec --user www-data ${BASENAME} php occ config:app:set richdocuments wopi_allowlist --value="127.0.0.1,172.16.0.0/12"
