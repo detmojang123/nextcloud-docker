@@ -39,10 +39,8 @@ cd /home/docker/nextcloud-docker
 rm -rf .git .github
 ```
 
-### Point DNS
-Make one or more DNS records pointing to your server/VPS (most likely A and AAAA).
-
 ### Spin up the containers
+Ensure your DNS records (A/AAAA) are pointing to your server, then run:
 ```bash
 docker compose up -d
 ```
@@ -52,10 +50,14 @@ docker compose up -d
 - Create your admin Account
 - Since the database variables are passed via the environment, Nextcloud should detect the PostgreSQL setup automatically
 
+### Set permissions for all the scripts
+```bash
+chmod +x post-setup clearlog dumpdb restoredb
+```
+
 ### Run the `post-setup` script
 Once the admin user is created and you can log in, run the included post-setup script to enable Redis, internal cron, and apply various system fixes:
 ```bash
-chmod +x post-setup
 ./post-setup
 ```
 
